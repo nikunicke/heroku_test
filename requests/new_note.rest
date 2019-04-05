@@ -1,0 +1,8 @@
+POST http://localhost:3001/notes
+Content-Type: application/json
+Connection: keep-alive
+
+{
+    "content": "VS:n REST-client on huippu",
+    "important": true
+}
