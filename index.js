@@ -22,36 +22,6 @@ morgan.token('data', (req, res) => {
 })
 app.use(morgan(':method :url :res[content-length] - :response-time ms :data'))
 
-let notes = [
-    {
-        id: 1,
-        content: 'HTML on helppoa',
-        date: '2017-12-10T17:30:31.098Z',
-        important: true
-    },
-    {
-        id: 2,
-        content: 'Selain pystyy suorittamaan vain javascriptiä',
-        date: '2017-12-10T18:39:34.091Z',
-        important: false
-    },
-    {
-        id: 3,
-        content: 'HTTP-protokollan tärkeimmät metodit ovat GET ja POST',
-        date: '2017-12-10T19:20:14.298Z',
-        important: true
-    }
-]
-
-
-const generateId = () => {
-    const maxId = notes.length > 0
-        ? Math.max(...notes.map(n => n.id))
-        : 0
-    return maxId + 1
-}
-
-
 
 app.get('/api/notes', (req, res) => {
     Note.find({}).then(notes => {
