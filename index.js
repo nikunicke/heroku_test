@@ -51,9 +51,6 @@ const generateId = () => {
     return maxId + 1
 }
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello World</h1>')
-})
 
 
 app.get('/api/notes', (req, res) => {
@@ -75,12 +72,6 @@ app.get('/api/notes/:id', (req, res, next) => {
 
 app.post('/api/notes', (req, res) => {
     const body = req.body
-
-    if (!body.content) {
-        return res.status(400).json({
-            error: 'Content missing'
-        })
-    }
 
     const note = new Note({
         content: body.content,
@@ -130,8 +121,6 @@ const errorHandler = (error, req, res, next) => {
     next(error)
 }
 
-
-app.use(unknownEndpoint)
 app.use(errorHandler)
 
 const PORT = process.env.PORT
