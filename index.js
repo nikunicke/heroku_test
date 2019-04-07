@@ -1,8 +1,9 @@
-require('dotenv').config()
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config()
+}
 const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
-const cors = require('cors')
 const Note = require('./models/note')
 
 
@@ -10,7 +11,6 @@ const app = express()
 
 
 app.use(express.static('build'))
-app.use(cors())
 app.use(bodyParser.json())
 
 
@@ -56,21 +56,21 @@ const generateId = () => {
 app.get('/api/notes', (req, res) => {
     Note.find({}).then(notes => {
         res.json(notes.map(note => note.toJSON()))
-    });
-});
+    })
+})
 
 app.get('/api/notes/:id', (req, res, next) => {
     Note.findById(req.params.id).then(note => {
         if (note) {
             res.json(note.toJSON())
         } else {
-            res.status(204).end()
+            res.status(404).end()
         }
     })
     .catch(err => next(err))
 })
 
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
     const body = req.body
 
     const note = new Note({
@@ -79,9 +79,12 @@ app.post('/api/notes', (req, res) => {
         date: new Date()
     })
 
-    note.save().then(savedNote => {
-        res.json(savedNote.toJSON())
-    })
+    note.save()
+        .then(savedNote => savedNote.toJSON())
+        .then(savedAndFormattedNote => {
+            res.json(savedAndFormattedNote)
+        })
+        .catch(err => next(err))
 })
 
 app.put('/api/notes/:id', (req, res, next) => {
@@ -110,18 +113,23 @@ app.delete('/api/notes/:id', (req, res, next) => {
 
 
 const unknownEndpoint = (req, res) => {
-    res.status(400).send({error: 'Unknown endpoint'})
+    res.status(404).send({error: 'Unknown endpoint' })
 }
+
+app.use(unknownEndpoint)
 
 const errorHandler = (error, req, res, next) => {
     console.log(error.message)
-    if (error.message === 'CastError' && error.kind == 'ObjectId') {
+    if (error.name === 'CastError' && error.kind == 'ObjectId') {
         return res.status(400).send({ error: 'Malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
     }
     next(error)
 }
 
 app.use(errorHandler)
+
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
