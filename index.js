@@ -8,6 +8,7 @@ const Note = require('./models/note')
 
 const app = express()
 
+
 app.use(express.static('build'))
 app.use(cors())
 app.use(bodyParser.json())
@@ -61,10 +62,15 @@ app.get('/api/notes', (req, res) => {
     });
 });
 
-app.get('/api/notes/:id', (req, res) => {
+app.get('/api/notes/:id', (req, res, next) => {
     Note.findById(req.params.id).then(note => {
-        res.json(note.toJSON())
+        if (note) {
+            res.json(note.toJSON())
+        } else {
+            res.status(204).end()
+        }
     })
+    .catch(err => next(err))
 })
 
 app.post('/api/notes', (req, res) => {
@@ -87,11 +93,27 @@ app.post('/api/notes', (req, res) => {
     })
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-    const id = Number(req.params.id)
-    notes = notes.filter(note => note.id !== id)
+app.put('/api/notes/:id', (req, res, next) => {
+    const body = req.body
 
-    res.status(204).end()
+    const note = {
+        content: body.content,
+        important: body.important,
+    }
+
+    Note.findByIdAndUpdate(req.params.id, note, { new: true })
+        .then(updatedNote => {
+            res.json(updatedNote.toJSON())
+        })
+        .catch(err => next(err))
+})
+
+app.delete('/api/notes/:id', (req, res, next) => {
+    Note.findByIdAndRemove(req.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(err => next(err))
 })
 
 
@@ -99,7 +121,18 @@ app.delete('/api/notes/:id', (req, res) => {
 const unknownEndpoint = (req, res) => {
     res.status(400).send({error: 'Unknown endpoint'})
 }
+
+const errorHandler = (error, req, res, next) => {
+    console.log(error.message)
+    if (error.message === 'CastError' && error.kind == 'ObjectId') {
+        return res.status(400).send({ error: 'Malformatted id' })
+    }
+    next(error)
+}
+
+
 app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
