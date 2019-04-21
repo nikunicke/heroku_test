@@ -1,19 +1,20 @@
 const config = require('./utils/config')
 const express = require('express')
-const bodyParser = require('bodyparser')
+const bodyParser = require('body-parser')
 const app = express()
 const notesRouter = require('./controllers/notes')
 const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
+const logger = require('./utils/logger')
 
-console.log('Connecting to ', config.MONGODB_URI)
+logger.info('Connecting to ', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
         .then(() => {
-            console.log('Connected to MongoDB')
+            logger.info('Connected to MongoDB')
         })
         .catch(err => {
-            console.log('Error connecting to MongoDB: ', err.message)
+            logger.info('Error connecting to MongoDB: ', err.message)
         })
 
 app.use(express.static('build'))
