@@ -1,9 +1,9 @@
 POST http://localhost:3001/api/notes
 Content-Type: application/json
-Connection: keep-alive
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im5pa3VuaWNrZSIsImlkIjoiNWNiZjJmYWNjZGE4MjczNjI4NGM0Y2FkIiwiaWF0IjoxNTU2MDM4OTgwfQ.b5XGE68bTsfUN7oiqHkyEwy42GQI6leOHtcyq0eqvv4
 
 {
-    "content":"Checking request logger",
-    "important": true
+    "content": "Poikkeusten käsittely on kannattavaa!",
+    "important": false
 }
 
